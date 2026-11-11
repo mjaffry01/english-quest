@@ -922,264 +922,294 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ROUND ${index ~/ 20 + 1} / 10   •   SENTENCE ${index + 1} / 200',
-                  style: const TextStyle(
-                    letterSpacing: 1.4,
-                    color: forest,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: count / 200,
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                const SizedBox(height: 8),
-                Text('$count mastered · +5 XP for each new sentence'),
-                const SizedBox(height: 22),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Choose the translation'),
-                      selected: quiz,
-                      onSelected: busy
-                          ? null
-                          : (_) => setState(() {
-                              quiz = true;
-                              prepare();
-                            }),
-                    ),
-                    ChoiceChip(
-                      label: const Text('Write & compare'),
-                      selected: !quiz,
-                      onSelected: busy
-                          ? null
-                          : (_) => setState(() {
-                              quiz = false;
-                              prepare();
-                            }),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                box(
-                  Column(
+      // The sentence and choices scroll; the answer/next buttons stay pinned
+      // at the bottom (and above the keyboard) so they are always reachable.
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'HOW WOULD YOU SAY THIS IN ENGLISH?',
-                        style: TextStyle(
-                          fontSize: 11,
-                          letterSpacing: 1.5,
+                      Text(
+                        'ROUND ${index ~/ 20 + 1} / 10   •   SENTENCE ${index + 1} / 200',
+                        style: const TextStyle(
+                          letterSpacing: 1.4,
                           color: forest,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      LinearProgressIndicator(
+                        value: count / 200,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      const SizedBox(height: 8),
+                      Text('$count mastered · +5 XP for each new sentence'),
+                      const SizedBox(height: 22),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Choose the translation'),
+                            selected: quiz,
+                            onSelected: busy
+                                ? null
+                                : (_) => setState(() {
+                                    quiz = true;
+                                    prepare();
+                                  }),
+                          ),
+                          ChoiceChip(
+                            label: const Text('Write & compare'),
+                            selected: !quiz,
+                            onSelected: busy
+                                ? null
+                                : (_) => setState(() {
+                                    quiz = false;
+                                    prepare();
+                                  }),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 20),
-                      SelectableText(
-                        pair['hi'],
-                        style: const TextStyle(
-                          fontSize: 28,
-                          height: 1.6,
-                          fontWeight: FontWeight.w600,
-                          color: ink,
+                      box(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'HOW WOULD YOU SAY THIS IN ENGLISH?',
+                              style: TextStyle(
+                                fontSize: 11,
+                                letterSpacing: 1.5,
+                                color: forest,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            SelectableText(
+                              pair['hi'],
+                              style: const TextStyle(
+                                fontSize: 28,
+                                height: 1.6,
+                                fontWeight: FontWeight.w600,
+                                color: ink,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              widget.day['tip'],
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.day['tip'],
-                        style: const TextStyle(color: Colors.black54),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (quiz)
-                  ...choices.map(
-                    (choice) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.all(20),
-                            foregroundColor: ink,
-                            disabledForegroundColor: ink,
-                            backgroundColor: submitted && choice == pair['en']
-                                ? const Color(0xFFDAEFE5)
-                                : selected == choice
-                                ? const Color(0xFFE8E9FF)
-                                : Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      const SizedBox(height: 20),
+                      if (quiz)
+                        ...choices.map(
+                          (choice) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  alignment: Alignment.centerLeft,
+                                  padding: const EdgeInsets.all(20),
+                                  foregroundColor: ink,
+                                  disabledForegroundColor: ink,
+                                  backgroundColor: submitted && choice == pair['en']
+                                      ? const Color(0xFFDAEFE5)
+                                      : selected == choice
+                                      ? const Color(0xFFE8E9FF)
+                                      : Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: submitted || busy
+                                    ? null
+                                    : () => setState(() => selected = choice),
+                                child: Text(
+                                  choice,
+                                  style: const TextStyle(fontSize: 17, height: 1.4),
+                                ),
+                              ),
                             ),
                           ),
-                          onPressed: submitted || busy
-                              ? null
-                              : () => setState(() => selected = choice),
-                          child: Text(
-                            choice,
-                            style: const TextStyle(fontSize: 17, height: 1.4),
+                        ),
+                      if (!quiz)
+                        TextField(
+                          controller: answer,
+                          enabled: !reveal,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Try your English translation',
+                            hintText: 'It’s okay to make mistakes.',
                           ),
+                          onChanged: (_) => setState(() {}),
                         ),
-                      ),
-                    ),
-                  ),
-                if (!quiz)
-                  TextField(
-                    controller: answer,
-                    enabled: !reveal,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Try your English translation',
-                      hintText: 'It’s okay to make mistakes.',
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                if (reveal) ...[
-                  const SizedBox(height: 16),
-                  box(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          quiz
-                              ? correct
-                                    ? '✨ You got it!'
-                                    : '🌱 A chance to learn'
-                              : 'Compare with the model answer',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                      if (reveal) ...[
+                        const SizedBox(height: 16),
+                        box(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                quiz
+                                    ? correct
+                                          ? '✨ You got it!'
+                                          : '🌱 A chance to learn'
+                                    : 'Compare with the model answer',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              SelectableText(
+                                pair['en'],
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Other natural translations may also be correct. Say it aloud once.',
+                              ),
+                              TextButton.icon(
+                                onPressed: listen,
+                                icon: const Icon(Icons.volume_up_outlined),
+                                label: const Text('Listen in English'),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        SelectableText(
-                          pair['en'],
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Other natural translations may also be correct. Say it aloud once.',
-                        ),
-                        TextButton.icon(
-                          onPressed: listen,
-                          icon: const Icon(Icons.volume_up_outlined),
-                          label: const Text('Listen in English'),
+                          color: const Color(0xFFE9F3E8),
                         ),
                       ],
-                    ),
-                    color: const Color(0xFFE9F3E8),
-                  ),
-                ],
-                const SizedBox(height: 20),
-                if (!reveal)
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed:
-                          (quiz ? selected == null : answer.text.trim().isEmpty)
-                          ? null
-                          : () {
-                              if (quiz) {
-                                check();
-                              } else {
-                                setState(() => reveal = true);
-                              }
-                            },
-                      child: Text(quiz ? 'Check answer' : 'Show model answer'),
-                    ),
-                  ),
-                if (reveal && quiz && correct)
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: busy ? null : () => finish(mastered: true),
-                      child: const Text('Got it · Next sentence →'),
-                    ),
-                  ),
-                if (reveal && quiz && !correct)
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      FilledButton(
-                        onPressed: busy
-                            ? null
-                            : () => setState(() => prepare()),
-                        child: const Text('Try this sentence again'),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          TextButton.icon(
+                            onPressed: busy || index == 0
+                                ? null
+                                : () => setState(() {
+                                    index--;
+                                    prepare();
+                                  }),
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text('Previous'),
+                          ),
+                          const Spacer(),
+                          DropdownButton<int>(
+                            value: index ~/ 20,
+                            items: List.generate(
+                              10,
+                              (i) => DropdownMenuItem(
+                                value: i,
+                                child: Text('Round ${i + 1}'),
+                              ),
+                            ),
+                            onChanged: busy
+                                ? null
+                                : (value) => setState(() {
+                                    index = value! * 20;
+                                    prepare();
+                                  }),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: busy ? null : () => finish(mastered: false),
-                        child: const Text('Save for practice & continue'),
-                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
-                if (reveal && !quiz)
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      FilledButton(
-                        onPressed: busy ? null : () => finish(mastered: true),
-                        child: const Text('My meaning matched ✓'),
-                      ),
-                      OutlinedButton(
-                        onPressed: busy ? null : () => finish(mastered: false),
-                        child: const Text('I need more practice'),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      onPressed: busy || index == 0
-                          ? null
-                          : () => setState(() {
-                              index--;
-                              prepare();
-                            }),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous'),
-                    ),
-                    const Spacer(),
-                    DropdownButton<int>(
-                      value: index ~/ 20,
-                      items: List.generate(
-                        10,
-                        (i) => DropdownMenuItem(
-                          value: i,
-                          child: Text('Round ${i + 1}'),
-                        ),
-                      ),
-                      onChanged: busy
-                          ? null
-                          : (value) => setState(() {
-                              index = value! * 20;
-                              prepare();
-                            }),
-                    ),
-                  ],
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
           ),
-        ),
+          Material(
+            color: paper,
+            elevation: 8,
+            child: SafeArea(
+              top: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (!reveal)
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed:
+                                  (quiz ? selected == null : answer.text.trim().isEmpty)
+                                  ? null
+                                  : () {
+                                      if (quiz) {
+                                        check();
+                                      } else {
+                                        setState(() => reveal = true);
+                                      }
+                                    },
+                              child: Text(quiz ? 'Check answer' : 'Show model answer'),
+                            ),
+                          ),
+                        if (reveal && quiz && correct)
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: busy ? null : () => finish(mastered: true),
+                              child: const Text('Got it · Next sentence →'),
+                            ),
+                          ),
+                        if (reveal && quiz && !correct)
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: [
+                              FilledButton(
+                                onPressed: busy
+                                    ? null
+                                    : () => setState(() => prepare()),
+                                child: const Text('Try this sentence again'),
+                              ),
+                              TextButton(
+                                onPressed: busy ? null : () => finish(mastered: false),
+                                child: const Text('Save for practice & continue'),
+                              ),
+                            ],
+                          ),
+                        if (reveal && !quiz)
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: [
+                              FilledButton(
+                                onPressed: busy ? null : () => finish(mastered: true),
+                                child: const Text('My meaning matched ✓'),
+                              ),
+                              OutlinedButton(
+                                onPressed: busy ? null : () => finish(mastered: false),
+                                child: const Text('I need more practice'),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
