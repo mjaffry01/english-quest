@@ -959,6 +959,16 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget build(BuildContext context) {
     final saved = widget.progress.saved.contains(pair['id']),
         count = widget.progress.count(widget.day['day']);
+    // Phones get a tighter layout so the question and all four answers fit on
+    // one screen without scrolling.
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    final gap = compact ? 12.0 : 20.0;
+    final wrongPick = submitted && !correct && selected != null;
+    final feedbackColor = !reveal
+        ? paper
+        : (quiz && !correct)
+        ? const Color(0xFFFFF0E6)
+        : const Color(0xFFE9F3E8);
     return Scaffold(
       appBar: AppBar(
         title: Text('Day ${widget.day['day']} · ${widget.day['title']}'),
@@ -977,115 +987,156 @@ class _LessonScreenState extends State<LessonScreen> {
           ),
         ],
       ),
-      // The sentence and choices scroll; the answer/next buttons stay pinned
-      // at the bottom (and above the keyboard) so they are always reachable.
+      // The sentence and choices scroll; the result and the answer/next buttons
+      // stay pinned at the bottom (and above the keyboard) so they are always
+      // visible.
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               controller: scroll,
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.fromLTRB(
+                compact ? 16 : 20,
+                compact ? 10 : 20,
+                compact ? 16 : 20,
+                20,
+              ),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 760),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'ROUND ${index ~/ 20 + 1} / 10   •   SENTENCE ${index + 1} / 200',
-                        style: const TextStyle(
-                          letterSpacing: 1.4,
-                          color: forest,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      LinearProgressIndicator(
-                        value: count / 200,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('$count mastered · +5 XP for each new sentence'),
-                      const SizedBox(height: 22),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
+                      Row(
                         children: [
-                          ChoiceChip(
-                            label: const Text('Choose the translation'),
-                            selected: quiz,
-                            onSelected: busy
-                                ? null
-                                : (_) => setState(() {
-                                    quiz = true;
-                                    prepare();
-                                  }),
+                          Expanded(
+                            child: Text(
+                              compact
+                                  ? 'ROUND ${index ~/ 20 + 1}/10 · ${index + 1}/200'
+                                  : 'ROUND ${index ~/ 20 + 1} / 10   •   SENTENCE ${index + 1} / 200',
+                              style: const TextStyle(
+                                letterSpacing: 1.2,
+                                color: forest,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
-                          ChoiceChip(
-                            label: const Text('Write & compare'),
-                            selected: !quiz,
-                            onSelected: busy
+                          SegmentedButton<bool>(
+                            showSelectedIcon: false,
+                            style: const ButtonStyle(
+                              visualDensity: VisualDensity.compact,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            segments: [
+                              ButtonSegment(
+                                value: true,
+                                label: Text(compact ? 'Choose' : 'Choose the translation'),
+                              ),
+                              ButtonSegment(
+                                value: false,
+                                label: Text(compact ? 'Write' : 'Write & compare'),
+                              ),
+                            ],
+                            selected: {quiz},
+                            onSelectionChanged: busy
                                 ? null
-                                : (_) => setState(() {
-                                    quiz = false;
+                                : (value) => setState(() {
+                                    quiz = value.first;
                                     prepare();
                                   }),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      box(
-                        Column(
+                      SizedBox(height: compact ? 8 : 12),
+                      LinearProgressIndicator(
+                        value: count / 200,
+                        minHeight: compact ? 6 : 8,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      if (!compact) ...[
+                        const SizedBox(height: 8),
+                        Text('$count mastered · +5 XP for each new sentence'),
+                      ],
+                      SizedBox(height: gap),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(compact ? 16 : 24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(compact ? 18 : 24),
+                          border: Border.all(color: const Color(0xFFE3E9E0)),
+                        ),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'HOW WOULD YOU SAY THIS IN ENGLISH?',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: compact ? 10 : 11,
                                 letterSpacing: 1.5,
                                 color: forest,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: compact ? 8 : 20),
                             SelectableText(
                               pair['hi'],
-                              style: const TextStyle(
-                                fontSize: 28,
-                                height: 1.6,
+                              style: TextStyle(
+                                fontSize: compact ? 23 : 28,
+                                height: compact ? 1.4 : 1.6,
                                 fontWeight: FontWeight.w600,
                                 color: ink,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: compact ? 6 : 16),
                             Text(
                               widget.day['tip'],
-                              style: const TextStyle(color: Colors.black54),
+                              style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: compact ? 13 : 14,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: gap),
                       if (quiz)
-                        ...choices.map(
-                          (choice) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
+                        ...choices.map((choice) {
+                          final isAnswer = choice == pair['en'];
+                          final isPick = choice == selected;
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: compact ? 8 : 10),
                             child: SizedBox(
                               width: double.infinity,
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(
                                   alignment: Alignment.centerLeft,
-                                  padding: const EdgeInsets.all(20),
+                                  padding: compact
+                                      ? const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        )
+                                      : const EdgeInsets.all(20),
                                   foregroundColor: ink,
                                   disabledForegroundColor: ink,
-                                  backgroundColor: submitted && choice == pair['en']
+                                  side: BorderSide(
+                                    color: submitted && isAnswer
+                                        ? forest
+                                        : wrongPick && isPick
+                                        ? const Color(0xFFD9534F)
+                                        : const Color(0xFFD7E2D9),
+                                    width: submitted && (isAnswer || isPick) ? 2 : 1,
+                                  ),
+                                  backgroundColor: submitted && isAnswer
                                       ? const Color(0xFFDAEFE5)
-                                      : selected == choice
+                                      : wrongPick && isPick
+                                      ? const Color(0xFFFBE3E0)
+                                      : isPick
                                       ? const Color(0xFFE8E9FF)
                                       : Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(compact ? 14 : 16),
                                   ),
                                 ),
                                 onPressed: submitted || busy
@@ -1093,16 +1144,20 @@ class _LessonScreenState extends State<LessonScreen> {
                                     : () => setState(() => selected = choice),
                                 child: Text(
                                   choice,
-                                  style: const TextStyle(fontSize: 17, height: 1.4),
+                                  style: TextStyle(
+                                    fontSize: compact ? 16 : 17,
+                                    height: 1.35,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       if (!quiz)
                         TextField(
                           controller: answer,
                           enabled: !reveal,
+                          minLines: compact ? 2 : 3,
                           maxLines: 3,
                           decoration: const InputDecoration(
                             labelText: 'Try your English translation',
@@ -1110,43 +1165,7 @@ class _LessonScreenState extends State<LessonScreen> {
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
-                      if (reveal) ...[
-                        const SizedBox(height: 16),
-                        box(
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                quiz
-                                    ? correct
-                                          ? '✨ You got it!'
-                                          : '🌱 A chance to learn'
-                                    : 'Compare with the model answer',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              SelectableText(
-                                pair['en'],
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Other natural translations may also be correct. Say it aloud once.',
-                              ),
-                              TextButton.icon(
-                                onPressed: listen,
-                                icon: const Icon(Icons.volume_up_outlined),
-                                label: const Text('Listen in English'),
-                              ),
-                            ],
-                          ),
-                          color: const Color(0xFFE9F3E8),
-                        ),
-                      ],
-                      const SizedBox(height: 24),
+                      SizedBox(height: compact ? 12 : 24),
                       Row(
                         children: [
                           TextButton.icon(
@@ -1184,7 +1203,6 @@ class _LessonScreenState extends State<LessonScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -1192,7 +1210,7 @@ class _LessonScreenState extends State<LessonScreen> {
             ),
           ),
           Material(
-            color: paper,
+            color: feedbackColor,
             elevation: 8,
             child: SafeArea(
               top: false,
@@ -1200,41 +1218,93 @@ class _LessonScreenState extends State<LessonScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 800),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                    padding: EdgeInsets.fromLTRB(
+                      compact ? 16 : 20,
+                      12,
+                      compact ? 16 : 20,
+                      12,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (reveal) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      quiz
+                                          ? correct
+                                                ? '✨ You got it!'
+                                                : '🌱 A chance to learn'
+                                          : 'Compare with the model answer',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: compact ? 17 : 20,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    SelectableText(
+                                      pair['en'],
+                                      style: TextStyle(
+                                        fontSize: compact ? 16 : 17,
+                                        height: 1.35,
+                                        color: ink,
+                                      ),
+                                    ),
+                                    if (!quiz || !compact)
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          'Other natural translations may also be correct. Say it aloud once.',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: 'Listen in English',
+                                onPressed: listen,
+                                icon: const Icon(Icons.volume_up_outlined),
+                                color: forest,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                        ],
                         if (!reveal)
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed:
-                                  (quiz ? selected == null : answer.text.trim().isEmpty)
-                                  ? null
-                                  : () {
-                                      if (quiz) {
-                                        check();
-                                      } else {
-                                        setState(() => reveal = true);
-                                      }
-                                    },
-                              child: Text(quiz ? 'Check answer' : 'Show model answer'),
-                            ),
+                          FilledButton(
+                            onPressed:
+                                (quiz ? selected == null : answer.text.trim().isEmpty)
+                                ? null
+                                : () {
+                                    if (quiz) {
+                                      check();
+                                    } else {
+                                      setState(() => reveal = true);
+                                    }
+                                  },
+                            child: Text(quiz ? 'Check answer' : 'Show model answer'),
                           ),
                         if (reveal && quiz && correct)
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: busy ? null : () => finish(mastered: true),
-                              child: const Text('Got it · Next sentence →'),
-                            ),
+                          FilledButton(
+                            onPressed: busy ? null : () => finish(mastered: true),
+                            child: const Text('Got it · Next sentence →'),
                           ),
                         if (reveal && quiz && !correct)
                           Wrap(
                             alignment: WrapAlignment.center,
                             spacing: 12,
-                            runSpacing: 8,
+                            runSpacing: 4,
                             children: [
                               FilledButton(
                                 onPressed: busy
