@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'install.dart';
 import 'progress.dart';
 
 const forest = Color(0xFF176B59),
@@ -181,6 +182,24 @@ class _QuestHomeState extends State<QuestHome> {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         actions: [
+          if (canOfferInstall()) ...[
+            wide
+                ? FilledButton.icon(
+                    onPressed: openInstall,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      minimumSize: const Size(0, 36),
+                    ),
+                    icon: const Icon(Icons.install_mobile, size: 18),
+                    label: const Text('Install app'),
+                  )
+                : IconButton.filled(
+                    tooltip: 'Install app',
+                    onPressed: openInstall,
+                    icon: const Icon(Icons.install_mobile, size: 20),
+                  ),
+            const SizedBox(width: 8),
+          ],
           Chip(label: Text('🔥 ${progress.streak(DateTime.now())}')),
           const SizedBox(width: 8),
           Chip(label: Text('✦ ${progress.xp}')),
@@ -645,6 +664,34 @@ class _QuestHomeState extends State<QuestHome> {
         style: Theme.of(context).textTheme.headlineLarge,
       ),
       const SizedBox(height: 20),
+      if (canOfferInstall()) ...[
+        box(
+          Row(
+            children: [
+              const Icon(Icons.install_mobile, color: forest, size: 32),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Install English Quest on your phone. It gets its own home-screen icon and works offline.',
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton(
+                onPressed: openInstall,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text('Install'),
+              ),
+            ],
+          ),
+          color: const Color(0xFFE9F3E8),
+        ),
+        const SizedBox(height: 20),
+      ],
       box(
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
