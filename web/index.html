@@ -1,2 +1,59 @@
 <!DOCTYPE html>
-<html lang="en"><head><base href="$FLUTTER_BASE_HREF"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#176B59"><meta name="description" content="A 100-day Hindi-to-English adventure. 200 sentence pairs every day, quizzes, listening, and streak rewards."><title>English Quest · 100 days</title><style>body{margin:0;background:#f7f8f2;font-family:Arial;color:#173e35}#loading{display:grid;place-content:center;height:100vh;text-align:center}</style></head><body><div id="loading"><h1>English Quest</h1><p>Your next adventure starts with a sentence.</p><p>Loading your learning trail…</p></div><script src="flutter_bootstrap.js" async></script></body></html>
+<html lang="en"><head><base href="$FLUTTER_BASE_HREF"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#176B59"><meta name="description" content="A 100-day Hindi-to-English adventure. 200 sentence pairs every day, quizzes, listening, and streak rewards."><title>English Quest · 100 days</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="English Quest"><meta name="application-name" content="English Quest">
+<style>body{margin:0;background:#f7f8f2;font-family:Arial;color:#173e35}#loading{display:grid;place-content:center;height:100vh;text-align:center}
+#eq-install{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:2147483647;margin:0 auto;max-width:440px;display:none;align-items:center;gap:12px;padding:12px 12px 12px 14px;background:#fff;color:#173e35;border:1px solid #d7e2d9;border-radius:16px;box-shadow:0 8px 28px rgba(23,62,53,.18);font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+#eq-install.show{display:flex}#eq-install img{width:40px;height:40px;border-radius:10px;flex:none}#eq-install p{margin:0;flex:1}#eq-install b{display:block;font-size:15px}
+#eq-install button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:9px 16px;cursor:pointer}#eq-install .go{background:#176b59;color:#fff}#eq-install .x{background:transparent;color:#5a6f68;padding:9px 10px}</style></head><body><div id="loading"><h1>English Quest</h1><p>Your next adventure starts with a sentence.</p><p>Loading your learning trail…</p></div>
+<div id="eq-install" role="dialog" aria-label="Install English Quest"><img src="icons/Icon-192.png" alt=""><p><b>Install English Quest</b><span id="eq-install-msg">Add it to your home screen and practise even offline.</span></p><button class="go" id="eq-install-go" type="button">Install</button><button class="x" id="eq-install-x" type="button" aria-label="Dismiss">✕</button></div>
+<script src="flutter_bootstrap.js" async></script>
+<script>
+(function () {
+  // Offline support: register our service worker, then hand it the list of files
+  // this visit loaded so the app also works without a connection next time.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+        setTimeout(function () {
+          var urls = performance.getEntriesByType('resource').map(function (e) { return e.name; });
+          if (reg.active) reg.active.postMessage({ type: 'cache-urls', urls: urls.concat([location.href]) });
+        }, 8000);
+      }).catch(function (e) { console.warn('Service worker registration failed', e); });
+    });
+  }
+
+  // Install banner: Android/desktop Chrome get a real Install button; iPhone/iPad
+  // Safari gets instructions, since iOS only installs via Share > Add to Home Screen.
+  var KEY = 'eq-install-dismissed';
+  function dismissed() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function remember() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (standalone || dismissed()) return;
+
+  var bar = document.getElementById('eq-install'), go = document.getElementById('eq-install-go');
+  function hide() { bar.classList.remove('show'); }
+  document.getElementById('eq-install-x').addEventListener('click', function () { hide(); remember(); });
+
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferred = e;
+    setTimeout(function () { bar.classList.add('show'); }, 4000);
+  });
+  go.addEventListener('click', function () {
+    if (!deferred) { hide(); remember(); return; }
+    deferred.prompt();
+    deferred.userChoice.then(function (c) { if (c.outcome === 'accepted') remember(); hide(); deferred = null; });
+  });
+  window.addEventListener('appinstalled', function () { hide(); remember(); });
+
+  var ua = navigator.userAgent;
+  var ios = /iPhone|iPad|iPod/.test(ua) || (ua.indexOf('Macintosh') > -1 && navigator.maxTouchPoints > 1);
+  if (ios) {
+    document.getElementById('eq-install-msg').textContent = 'Tap the Share button, then “Add to Home Screen”.';
+    go.textContent = 'Got it';
+    setTimeout(function () { bar.classList.add('show'); }, 4000);
+  }
+})();
+</script></body></html>

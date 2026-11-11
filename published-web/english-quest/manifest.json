@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "English Quest · 100 days",
+  "short_name": "English Quest",
+  "description": "A 100-day Hindi-to-English adventure. 200 sentence pairs every day, quizzes, listening, and streak rewards.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F7F8F2",
+  "theme_color": "#176B59",
+  "categories": ["education", "kids"],
+  "icons": [
+    { "src": "icons/Icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/Icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/Icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/Icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
