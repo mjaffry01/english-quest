@@ -1,0 +1,2 @@
+Run python3 -m http.server 8080 in this published-web directory, then open http://localhost:8080/english-quest/.
+This is the compiled web app; source and GitHub workflow are in the parent directory.
