@@ -778,6 +778,7 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   final tts = FlutterTts(), answer = TextEditingController();
+  final scroll = ScrollController();
   int index = 0;
   bool reveal = false,
       quiz = true,
@@ -820,7 +821,13 @@ class _LessonScreenState extends State<LessonScreen> {
   void dispose() {
     tts.stop();
     answer.dispose();
+    scroll.dispose();
     super.dispose();
+  }
+
+  /// Show a new sentence from the top of the page.
+  void toTop() {
+    if (scroll.hasClients) scroll.jumpTo(0);
   }
 
   void notice(String text) =>
@@ -898,6 +905,7 @@ class _LessonScreenState extends State<LessonScreen> {
       prepare();
       busy = false;
     });
+    toTop();
   }
 
   @override
@@ -928,6 +936,7 @@ class _LessonScreenState extends State<LessonScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
+              controller: scroll,
               padding: const EdgeInsets.all(20),
               child: Center(
                 child: ConstrainedBox(
@@ -1096,10 +1105,13 @@ class _LessonScreenState extends State<LessonScreen> {
                           TextButton.icon(
                             onPressed: busy || index == 0
                                 ? null
-                                : () => setState(() {
-                                    index--;
-                                    prepare();
-                                  }),
+                                : () {
+                                    setState(() {
+                                      index--;
+                                      prepare();
+                                    });
+                                    toTop();
+                                  },
                             icon: const Icon(Icons.arrow_back),
                             label: const Text('Previous'),
                           ),
@@ -1115,10 +1127,13 @@ class _LessonScreenState extends State<LessonScreen> {
                             ),
                             onChanged: busy
                                 ? null
-                                : (value) => setState(() {
-                                    index = value! * 20;
-                                    prepare();
-                                  }),
+                                : (value) {
+                                    setState(() {
+                                      index = value! * 20;
+                                      prepare();
+                                    });
+                                    toTop();
+                                  },
                           ),
                         ],
                       ),
